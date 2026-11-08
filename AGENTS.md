@@ -10,7 +10,7 @@ No proxy, no governance.
 
 ```
 src/     Vault.sol, Scheduler.sol
-test/    Vault.t.sol
+test/    Vault.t.sol, Node.t.sol
 ```
 
 ## Commands
@@ -22,7 +22,11 @@ forge fmt --check
 ```
 
 `forge test` currently reports 11 passing. `test/Node.t.sol` forks the
-staging endpoint in `foundry.toml`, so those two need network access; the other 9 run offline.
+staging endpoint from `foundry.toml`, so those two need network access; the
+other 9 run offline.
+
+`gen-fixture.sh` rewrites the fingerprint in `Node.t.sol` from the current
+environment. Solidity cannot read shell variables, so it has to be baked in.
 
 No submodules: the tests use a minimal inline `Vm` interface, so a fresh
 clone needs nothing else.
