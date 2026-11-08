@@ -13,3 +13,6 @@ verbosity = 2
 line_length = 100
 tab_width = 4
 bracket_spacing = true
+
+[rpc_endpoints]
+staging = "https://rpc.198.13.158.199.sslip.io/rpc"

@@ -21,7 +21,8 @@ forge test
 forge fmt --check
 ```
 
-`forge test` currently reports 9 passing. No submodules: the tests use a
+`forge test` currently reports 11 passing. `test/Node.t.sol` forks the
+staging endpoint in `foundry.toml`, so those two need network access; the other 9 run offline. No submodules: the tests use a
 minimal inline `Vm` interface, so a fresh clone needs nothing else.
 
 ## Conventions
